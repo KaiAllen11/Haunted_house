@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>The Haunted House</title>
+<style>
+:root{--red:#c63d49;--cream:#e8dfd0;--muted:#9c958b}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:var(--cream);font-family:Georgia,serif;touch-action:none}
+#game{display:block;width:100vw;height:100vh;background:#08090d}
+#hud{position:fixed;inset:0;pointer-events:none}
+.top{display:flex;justify-content:space-between;gap:12px;padding:14px;align-items:flex-start}
+.panel{background:#090b10cc;border:1px solid #72645b88;padding:9px 12px;border-radius:7px;backdrop-filter:blur(4px);font:12px/1.5 system-ui,sans-serif;letter-spacing:.04em}
+#objective{max-width:55vw}
+#status{min-width:125px;text-align:right}
+#message{position:absolute;left:50%;bottom:19%;transform:translateX(-50%);max-width:88vw;text-align:center;background:#08090de8;border:1px solid #7d625b;padding:12px 17px;border-radius:7px;font:14px/1.45 system-ui,sans-serif;display:none}
+#hint{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);font:12px system-ui,sans-serif;color:#d5c6b3;text-shadow:0 2px 5px #000;text-align:center}
+#start,#end{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#25232a 0,#090a0e 70%);padding:22px}
+.dialog{max-width:510px;width:100%;text-align:center;border:1px solid #74645c;background:#0b0d12ed;padding:28px 23px;border-radius:10px;box-shadow:0 15px 70px #000}
+h1{font-size:clamp(30px,7vw,54px);letter-spacing:.06em;margin:0 0 8px;color:#e3d6c7;text-shadow:0 0 18px #9a303c}
+.sub{color:#b5a99c;font:14px/1.6 system-ui,sans-serif}
+button{background:#7d2632;color:#fff0e5;border:1px solid #c06b70;border-radius:6px;padding:12px 20px;font: bold 14px system-ui,sans-serif;cursor:pointer;margin-top:16px}
+button:active{transform:scale(.98)}
+#end{display:none}
+#controls{position:fixed;bottom:18px;left:14px;right:14px;display:none;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px;gap:4px;pointer-events:auto}
+.pad button,.actions button{margin:0;padding:0;background:#171920cc;border:1px solid #aaa0a055;border-radius:9px;color:#f1e8df;font-size:18px;touch-action:none;min-width:44px}
+.pad .up{grid-column:2;grid-row:1}.pad .left{grid-column:1;grid-row:2}.pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
+.actions{display:flex;gap:7px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;max-width:52%}
+.actions button{font-size:11px;padding:0 10px;min-height:42px}
+@media (hover:hover) and (pointer:fine){#controls{display:none!important}}
+@media (max-width:650px){.top{padding:8px}.panel{font-size:10px;padding:7px 9px}#controls{display:flex}.actions{max-width:58%}.actions button{font-size:10px;padding:0 8px}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud">
+ <div class="top">
+  <div class="panel" id="objective">OBJECTIVE: Find the brass key.</div>
+  <div class="panel" id="status">HEALTH ▰▰▰<br>FLASHLIGHT ▰▰▰</div>
+ </div>
+ <div id="message"></div><div id="hint">WASD / arrow keys to move · E to interact · F flashlight</div>
+</div>
+<div id="controls">
+ <div class="pad">
+  <button class="up" data-key="ArrowUp">▲</button><button class="left" data-key="ArrowLeft">◀</button><button class="down" data-key="ArrowDown">▼</button><button class="right" data-key="ArrowRight">▶</button>
+ </div>
+ <div class="actions"><button data-action="interact">INTERACT</button><button data-action="light">LIGHT</button><button data-action="hide">HIDE</button></div>
+</div>
+<div id="start"><div class="dialog">
+ <h1>THE HAUNTED HOUSE</h1>
+ <p class="sub">A 2D first-person horror adventure<br><br>You wake inside an abandoned mansion. The front door is locked. Something is moving in the dark — and it knows you're here.<br><br><b>Find the brass key, discover the exit and don't let the ghost catch you.</b></p>
+ <p class="sub">Desktop: WASD / arrows · E interact · F flashlight · H hide<br>Mobile: use the on-screen controls</p>
+ <button id="begin">ENTER THE HOUSE</button>
+ </div></div>
+<div id="end"><div class="dialog"><h1 id="endTitle">YOU ESCAPED</h1><p class="sub" id="endText"></p><button onclick="location.reload()">PLAY AGAIN</button></div></div>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const start=document.getElementById('start'),end=document.getElementById('end');
+const objective=document.getElementById('objective'),status=document.getElementById('status'),message=document.getElementById('message'),hint=document.getElementById('hint');
+let W=0,H=0,playing=false,last=0,elapsed=0,flash=true,health=3,keyFound=false,hidden=false,doorOpen=false,msgTimer=0;
+const keys={};
+const player={x:1.5,y:1.5,a:0.0,speed:2.15};
+const map=[
+"111111111111",
+"100000000001",
+"101110110101",
+"100010000001",
+"101010111101",
+"100000100001",
+"111010101101",
+"100010000001",
+"101110110101",
+"100000000001",
+"111111111111"
+];
+const objects=[{x:8.5,y:2.5,type:'key',taken:false},{x:3.5,y:7.5,type:'battery',taken:false},{x:9.5,y:8.5,type:'note',taken:false}];
+const ghost={x:9.5,y:8.5,mode:'roam',timer:0,visible:false};
+function resize(){W=canvas.width=innerWidth*devicePixelRatio;H=canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(1,0,0,1,0,0)}
+addEventListener('resize',resize);resize();
+function wall(x,y){return map[Math.floor(y)]?.[Math.floor(x)]!=='0'}
+function say(t){message.textContent=t;message.style.display='block';msgTimer=3.2}
+function cast(angle){
+ let d=0,step=.025;while(d<16){d+=step;let x=player.x+Math.cos(angle)*d,y=player.y+Math.sin(angle)*d;if(wall(x,y))return d}return 16
+}
+function render(){
+ const rays=Math.max(160,Math.floor(W/3)),fov=Math.PI/2.9;
+ ctx.fillStyle='#10131b';ctx.fillRect(0,0,W,H/2);
+ let grad=ctx.createLinearGradient(0,0,0,H/2);grad.addColorStop(0,'#07090e');grad.addColorStop(1,'#333039');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H/2);
+ let floor=ctx.createLinearGradient(0,H/2,0,H);floor.addColorStop(0,'#302a2a');floor.addColorStop(1,'#09090d');ctx.fillStyle=floor;ctx.fillRect(0,H/2,W,H/2);
+ for(let i=0;i<rays;i++){
+  let a=player.a-fov/2+(i/rays)*fov,d=cast(a),correct=d*Math.cos(a-player.a),height=Math.min(H*1.5,H/(correct+.08));
+  let shade=Math.max(10,105-correct*11);let side=Math.sin(a*17)>0?1:.78;
+  ctx.fillStyle=`rgb(${shade*side},${shade*.9*side},${shade*side})`;ctx.fillRect(i*W/rays,(H-height)/2,W/rays+1,height);
+  if(i%12===0){ctx.fillStyle='#090a0d33';ctx.fillRect(i*W/rays,(H-height)/2,W/rays,height)}
+ }
+ // flashlight vignette
+ let v=ctx.createRadialGradient(W/2,H*.53,10,W/2,H*.53,H*.62);
+ v.addColorStop(0,flash?'#ffffff00':'#00000099');v.addColorStop(.55,flash?'#00000022':'#000000cc');v.addColorStop(1,'#000000ee');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+ // ghost silhouette when near or during hunt
+ let gd=Math.hypot(ghost.x-player.x,ghost.y-player.y);
+ if(gd<5.8 && !hidden){
+  let rel=Math.atan2(ghost.y-player.y,ghost.x-player.x)-player.a;while(rel>Math.PI)rel-=2*Math.PI;while(rel<-Math.PI)rel+=2*Math.PI;
+  if(Math.abs(rel)<fov*.58){
+   let sx=W/2+(rel/fov)*W, sy=H*.52, size=Math.min(H*.55,H/(gd+.3)*.65);
+   ctx.save();ctx.globalAlpha=Math.min(.9,(6-gd)/4);ctx.fillStyle='#08070a';
+   ctx.beginPath();ctx.ellipse(sx,sy,size*.23,size*.43,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#d9d0c2';ctx.shadowColor='#c51e32';ctx.shadowBlur=18;
+   ctx.beginPath();ctx.arc(sx-size*.09,sy-size*.12,size*.025,0,Math.PI*2);ctx.arc(sx+size*.09,sy-size*.12,size*.025,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+ }
+ // crosshair
+ ctx.strokeStyle='#d9d0c277';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2-7,H/2);ctx.lineTo(W/2+7,H/2);ctx.moveTo(W/2,H/2-7);ctx.lineTo(W/2,H/2+7);ctx.stroke();
+}
+function move(dx,dy){let nx=player.x+dx,ny=player.y+dy;if(!wall(nx,player.y))player.x=nx;if(!wall(player.x,ny))player.y=ny}
+function interact(){
+ if(hidden){hidden=false;say('You leave the hiding place. Stay quiet.');return}
+ let near=objects.find(o=>!o.taken&&Math.hypot(o.x-player.x,o.y-player.y)<1.25);
+ if(near){near.taken=true;if(near.type==='key'){keyFound=true;objective.textContent='OBJECTIVE: Use the brass key at the front door.';say('You found the brass key. The front door may finally open.')}
+ else if(near.type==='battery'){flash=true;say('A battery! Your flashlight is recharged.')}
+ else {say('A torn diary page: “It hides when the lights go out. It listens for footsteps...”');}return}
+ if(Math.hypot(player.x-1.5,player.y-9.45)<1.5){if(keyFound){doorOpen=true;finish(true)}else say('The front door is locked. Find the brass key.');return}
+ say('Nothing useful nearby. Look around carefully.');
+}
+function finish(win){playing=false;end.style.display='flex';document.getElementById('endTitle').textContent=win?'YOU ESCAPED':'CAUGHT IN THE DARK';document.getElementById('endText').textContent=win?'You unlocked the mansion and escaped into the cold night. But from an upstairs window, two pale eyes are still watching.':'The ghost found you in the darkness. The mansion has claimed another visitor.'}
+function update(dt){
+ elapsed+=dt;if(msgTimer>0){msgTimer-=dt;if(msgTimer<=0)message.style.display='none'}
+ if(hidden){ghost.timer+=dt;if(ghost.timer>4){hidden=false;ghost.timer=0;say('The ghost is getting closer. You cannot hide forever.')} }
+ let turn=(keys.ArrowLeft||keys.a?-1:0)+(keys.ArrowRight||keys.d?1:0);player.a+=turn*dt*2.25;
+ let forward=(keys.ArrowUp||keys.w?1:0)-(keys.ArrowDown||keys.s?1:0);
+ if(forward&&!hidden)move(Math.cos(player.a)*forward*player.speed*dt,Math.sin(player.a)*forward*player.speed*dt);
+ // ghost alternates between searching and stalking; it pauses to hide when player faces it
+ let dist=Math.hypot(player.x-ghost.x,player.y-ghost.y);
+ ghost.timer+=dt;
+ if(ghost.mode==='hide'&&ghost.timer>2.2){ghost.mode='hunt';ghost.timer=0}
+ else if(ghost.mode==='hunt'&&ghost.timer>7){ghost.mode='hide';ghost.timer=0}
+ if(ghost.mode==='hunt'&&!hidden){
+  let ang=Math.atan2(player.y-ghost.y,player.x-ghost.x),speed=.72;
+  let nx=ghost.x+Math.cos(ang)*speed*dt,ny=ghost.y+Math.sin(ang)*speed*dt;
+  if(!wall(nx,ghost.y))ghost.x=nx;if(!wall(ghost.x,ny))ghost.y=ny;
+ }
+ if(dist<.62&&!hidden){health--;ghost.x=9.5;ghost.y=8.5;ghost.mode='hide';ghost.timer=0;say('The ghost touched you! It vanished... for now.');if(health<=0)finish(false)}
+ status.innerHTML='HEALTH '+('▰'.repeat(health))+('▱'.repeat(3-health))+'<br>FLASHLIGHT '+(flash?'▰▰▰':'▱▱▱')+'<br>GHOST: '+(ghost.mode==='hunt'?'HUNTING':'HIDING');
+ if(elapsed>10&&objective.textContent.includes('Find the brass'))objective.textContent='OBJECTIVE: Search the house for the brass key.';
+}
+function loop(t){if(!playing)return;let dt=Math.min(.05,(t-last)/1000||0);last=t;update(dt);render();requestAnimationFrame(loop)}
+document.getElementById('begin').onclick=()=>{start.style.display='none';playing=true;last=performance.now();say('The door slams shut behind you. Find the brass key.');requestAnimationFrame(loop)};
+addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.toLowerCase()==='e')interact();if(e.key.toLowerCase()==='f'){flash=!flash;say(flash?'Flashlight on.':'Flashlight off.')}if(e.key.toLowerCase()==='h'){hidden=!hidden;ghost.timer=0;say(hidden?'You hide. Hold still.':'You leave your hiding place.')}});
+addEventListener('keyup',e=>keys[e.key]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{
+ const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false));
+});
+document.querySelector('[data-action="interact"]').onclick=interact;
+document.querySelector('[data-action="light"]').onclick=()=>{flash=!flash;say(flash?'Flashlight on.':'Flashlight off.')};
+document.querySelector('[data-action="hide"]').onclick=()=>{hidden=!hidden;ghost.timer=0;say(hidden?'You hide. Hold still.':'You leave your hiding place.')};
+})();
+</script>
+</body></html>
