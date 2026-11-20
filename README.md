@@ -1,20 +1,13 @@
-# The Haunted House
+# The Haunted House — Easy Adventure
 
-A small browser-based 2D first-person horror escape prototype.
-
-## Play locally
-Open `index.html` in a modern browser.
-
-## Publish with GitHub Pages
-1. Create a new GitHub repository (for example, `haunted-house`).
-2. Upload `index.html` to the repository root.
-3. Open **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Select the `main` branch and `/ (root)`, then Save.
-6. Wait for GitHub Pages to publish your game. Open the URL shown there.
+A mobile-friendly first-person haunted-house mini adventure.
 
 ## Controls
-- Desktop: WASD / arrow keys to move, E to interact, F to toggle flashlight, H to hide.
-- Mobile: on-screen directional pad, INTERACT, LIGHT and HIDE buttons.
+- Desktop: WASD / arrow keys to move, E to pick up/open, F flashlight, H hide.
+- Mobile: on-screen directional pad and action buttons.
+- The key is close to the starting point and glows gold.
+- A mini-map shows your position, the key, and the exit.
+- The ghost moves slowly and alternates between hunting and hiding.
 
-This is a first playable prototype. Next improvements could include proper room transitions, more puzzles, audio, ghost pathfinding and saved progress.
+## Publish on GitHub Pages
+Upload `index.html` and `README.md` to the root of your repository. Then open Settings → Pages → Deploy from a branch → `main` → `/(root)` → Save.
