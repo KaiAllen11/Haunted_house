@@ -1,160 +1,71 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>The Haunted House</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>The Haunted House — Easy Adventure</title>
 <style>
-:root{--red:#c63d49;--cream:#e8dfd0;--muted:#9c958b}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:var(--cream);font-family:Georgia,serif;touch-action:none}
-#game{display:block;width:100vw;height:100vh;background:#08090d}
-#hud{position:fixed;inset:0;pointer-events:none}
-.top{display:flex;justify-content:space-between;gap:12px;padding:14px;align-items:flex-start}
-.panel{background:#090b10cc;border:1px solid #72645b88;padding:9px 12px;border-radius:7px;backdrop-filter:blur(4px);font:12px/1.5 system-ui,sans-serif;letter-spacing:.04em}
-#objective{max-width:55vw}
-#status{min-width:125px;text-align:right}
-#message{position:absolute;left:50%;bottom:19%;transform:translateX(-50%);max-width:88vw;text-align:center;background:#08090de8;border:1px solid #7d625b;padding:12px 17px;border-radius:7px;font:14px/1.45 system-ui,sans-serif;display:none}
-#hint{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);font:12px system-ui,sans-serif;color:#d5c6b3;text-shadow:0 2px 5px #000;text-align:center}
-#start,#end{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#25232a 0,#090a0e 70%);padding:22px}
-.dialog{max-width:510px;width:100%;text-align:center;border:1px solid #74645c;background:#0b0d12ed;padding:28px 23px;border-radius:10px;box-shadow:0 15px 70px #000}
-h1{font-size:clamp(30px,7vw,54px);letter-spacing:.06em;margin:0 0 8px;color:#e3d6c7;text-shadow:0 0 18px #9a303c}
-.sub{color:#b5a99c;font:14px/1.6 system-ui,sans-serif}
-button{background:#7d2632;color:#fff0e5;border:1px solid #c06b70;border-radius:6px;padding:12px 20px;font: bold 14px system-ui,sans-serif;cursor:pointer;margin-top:16px}
-button:active{transform:scale(.98)}
-#end{display:none}
-#controls{position:fixed;bottom:18px;left:14px;right:14px;display:none;justify-content:space-between;align-items:end;pointer-events:none}
-.pad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px;gap:4px;pointer-events:auto}
-.pad button,.actions button{margin:0;padding:0;background:#171920cc;border:1px solid #aaa0a055;border-radius:9px;color:#f1e8df;font-size:18px;touch-action:none;min-width:44px}
-.pad .up{grid-column:2;grid-row:1}.pad .left{grid-column:1;grid-row:2}.pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
-.actions{display:flex;gap:7px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;max-width:52%}
-.actions button{font-size:11px;padding:0 10px;min-height:42px}
-@media (hover:hover) and (pointer:fine){#controls{display:none!important}}
-@media (max-width:650px){.top{padding:8px}.panel{font-size:10px;padding:7px 9px}#controls{display:flex}.actions{max-width:58%}.actions button{font-size:10px;padding:0 8px}}
-</style>
-</head>
-<body>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090a10;color:#eee5da;font-family:system-ui,sans-serif;touch-action:none}
+canvas{display:block;width:100vw;height:100vh}
+#hud{position:fixed;inset:0;pointer-events:none}.top{display:flex;justify-content:space-between;gap:8px;padding:10px}
+.panel{background:#10131bdc;border:1px solid #9a8b7a66;border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.45;backdrop-filter:blur(5px)}
+#objective{max-width:65vw}#map{position:absolute;right:12px;top:76px;width:112px;height:112px;background:#0b0d12dd;border:1px solid #9a8b7a66;border-radius:8px}
+#message{position:absolute;left:50%;bottom:19%;transform:translateX(-50%);display:none;background:#10131bf2;border:1px solid #a88b68;padding:11px 15px;border-radius:9px;max-width:88vw;text-align:center;font-size:14px}
+#hint{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);font-size:12px;text-shadow:0 2px 5px black;text-align:center;width:90%}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse,#29232a,#08090d 75%)}
+.dialog{max-width:480px;width:100%;padding:26px 22px;text-align:center;background:#0d1017f2;border:1px solid #8b7467;border-radius:14px;box-shadow:0 20px 80px #000}
+h1{font-family:Georgia,serif;font-size:clamp(30px,8vw,48px);margin:0 0 10px;color:#eadccc;text-shadow:0 0 18px #a52e42}
+p{color:#c6b9aa;line-height:1.6;font-size:14px}
+button{border:1px solid #c67a78;background:#762d39;color:#fff4e9;padding:12px 17px;border-radius:9px;font-weight:700}
+#controls{position:fixed;bottom:12px;left:12px;right:12px;display:none;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{display:grid;grid-template-columns:44px 44px 44px;grid-template-rows:44px 44px;gap:3px;pointer-events:auto}
+.pad button,.actions button{padding:0;margin:0;background:#171a22e8;border-color:#aaa5a066;min-width:42px;min-height:42px}
+.up{grid-column:2}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}
+.actions{display:flex;gap:5px;pointer-events:auto}.actions button{font-size:10px;padding:0 9px}
+@media(max-width:700px){#controls{display:flex}.panel{font-size:10px;padding:7px 8px}#map{width:88px;height:88px;top:66px}.actions button{font-size:9px;padding:0 7px}}
+</style></head><body>
 <canvas id="game"></canvas>
-<div id="hud">
- <div class="top">
-  <div class="panel" id="objective">OBJECTIVE: Find the brass key.</div>
-  <div class="panel" id="status">HEALTH ▰▰▰<br>FLASHLIGHT ▰▰▰</div>
- </div>
- <div id="message"></div><div id="hint">WASD / arrow keys to move · E to interact · F flashlight</div>
-</div>
-<div id="controls">
- <div class="pad">
-  <button class="up" data-key="ArrowUp">▲</button><button class="left" data-key="ArrowLeft">◀</button><button class="down" data-key="ArrowDown">▼</button><button class="right" data-key="ArrowRight">▶</button>
- </div>
- <div class="actions"><button data-action="interact">INTERACT</button><button data-action="light">LIGHT</button><button data-action="hide">HIDE</button></div>
-</div>
-<div id="start"><div class="dialog">
- <h1>THE HAUNTED HOUSE</h1>
- <p class="sub">A 2D first-person horror adventure<br><br>You wake inside an abandoned mansion. The front door is locked. Something is moving in the dark — and it knows you're here.<br><br><b>Find the brass key, discover the exit and don't let the ghost catch you.</b></p>
- <p class="sub">Desktop: WASD / arrows · E interact · F flashlight · H hide<br>Mobile: use the on-screen controls</p>
- <button id="begin">ENTER THE HOUSE</button>
- </div></div>
-<div id="end"><div class="dialog"><h1 id="endTitle">YOU ESCAPED</h1><p class="sub" id="endText"></p><button onclick="location.reload()">PLAY AGAIN</button></div></div>
+<div id="hud"><div class="top"><div class="panel" id="objective">⭐ Find the glowing key just ahead!</div><div class="panel" id="status">❤️❤️❤️<br>🔦 ON</div></div>
+<canvas id="map" width="112" height="112"></canvas><div id="message"></div><div id="hint">Move: WASD / arrows · Interact: E · Light: F · Hide: H</div></div>
+<div id="controls"><div class="pad"><button class="up" data-key="ArrowUp">▲</button><button class="left" data-key="ArrowLeft">◀</button><button class="down" data-key="ArrowDown">▼</button><button class="right" data-key="ArrowRight">▶</button></div><div class="actions"><button data-act="interact">PICK / OPEN</button><button data-act="light">🔦</button><button data-act="hide">HIDE</button></div></div>
+<div class="overlay" id="start"><div class="dialog"><h1>THE HAUNTED HOUSE</h1><p>A spooky little adventure — not too hard, just enough mystery!<br><br>✨ The golden key is in the first hallway. Follow the sparkle, pick it up, then head back to the front door.<br><br>The ghost is slow. You can hide if it gets close. Take your time!</p><button id="play">LET'S PLAY 👻</button></div></div>
+<div class="overlay" id="end" style="display:none"><div class="dialog"><h1 id="endTitle">YOU ESCAPED!</h1><p id="endText">You made it out of the mansion!</p><button onclick="location.reload()">PLAY AGAIN</button></div></div>
 <script>
 (()=>{
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-const start=document.getElementById('start'),end=document.getElementById('end');
-const objective=document.getElementById('objective'),status=document.getElementById('status'),message=document.getElementById('message'),hint=document.getElementById('hint');
-let W=0,H=0,playing=false,last=0,elapsed=0,flash=true,health=3,keyFound=false,hidden=false,doorOpen=false,msgTimer=0;
-const keys={};
-const player={x:1.5,y:1.5,a:0.0,speed:2.15};
-const map=[
-"111111111111",
-"100000000001",
-"101110110101",
-"100010000001",
-"101010111101",
-"100000100001",
-"111010101101",
-"100010000001",
-"101110110101",
-"100000000001",
-"111111111111"
-];
-const objects=[{x:8.5,y:2.5,type:'key',taken:false},{x:3.5,y:7.5,type:'battery',taken:false},{x:9.5,y:8.5,type:'note',taken:false}];
-const ghost={x:9.5,y:8.5,mode:'roam',timer:0,visible:false};
-function resize(){W=canvas.width=innerWidth*devicePixelRatio;H=canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(1,0,0,1,0,0)}
-addEventListener('resize',resize);resize();
-function wall(x,y){return map[Math.floor(y)]?.[Math.floor(x)]!=='0'}
-function say(t){message.textContent=t;message.style.display='block';msgTimer=3.2}
-function cast(angle){
- let d=0,step=.025;while(d<16){d+=step;let x=player.x+Math.cos(angle)*d,y=player.y+Math.sin(angle)*d;if(wall(x,y))return d}return 16
+const c=document.getElementById('game'),g=c.getContext('2d'),mc=document.getElementById('map'),m=mc.getContext('2d');
+let W,H,active=false,last=0,flash=true,health=3,hasKey=false,hidden=false,notice=0,elapsed=0;
+const keys={};const p={x:1.5,y:1.5,a:0,speed:2.5};
+const world=["111111111111","100000000001","101110110101","100010000001","101010111101","100000100001","111010101101","100010000001","101110110101","100000000001","111111111111"];
+const key={x:4.2,y:1.5,taken:false},battery={x:3.5,y:7.5,taken:false};
+const ghost={x:9.5,y:8.5,mode:'wander',timer:0};
+function resize(){W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio}onresize=resize;resize();
+function wall(x,y){return world[Math.floor(y)]?.[Math.floor(x)]!=='0'}
+function say(t){let e=document.getElementById('message');e.textContent=t;e.style.display='block';notice=3}
+function ray(a){for(let d=0;d<14;d+=.025)if(wall(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d))return d;return 14}
+function draw(){
+ let fov=Math.PI/2.8,n=Math.ceil(W/3);
+ let sky=g.createLinearGradient(0,0,0,H/2);sky.addColorStop(0,'#080a10');sky.addColorStop(1,'#3a3035');g.fillStyle=sky;g.fillRect(0,0,W,H/2);
+ let fl=g.createLinearGradient(0,H/2,0,H);fl.addColorStop(0,'#393034');fl.addColorStop(1,'#08090d');g.fillStyle=fl;g.fillRect(0,H/2,W,H/2);
+ for(let i=0;i<n;i++){let a=p.a-fov/2+i/n*fov,d=ray(a),z=d*Math.cos(a-p.a),h=Math.min(H*1.5,H/(z+.1)),s=Math.max(12,105-z*10);g.fillStyle=`rgb(${s},${s*.87},${s*.88})`;g.fillRect(i*W/n,(H-h)/2,W/n+1,h)}
+ let v=g.createRadialGradient(W/2,H*.52,10,W/2,H*.52,H*.7);v.addColorStop(0,flash?'#00000000':'#000000bb');v.addColorStop(.6,'#00000044');v.addColorStop(1,'#000000ee');g.fillStyle=v;g.fillRect(0,0,W,H);
+ if(!key.taken){let a=Math.atan2(key.y-p.y,key.x-p.x)-p.a;while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;let d=Math.hypot(key.x-p.x,key.y-p.y);if(Math.abs(a)<fov*.65&&d<9){let x=W/2+a/fov*W,y=H*.56;g.save();g.fillStyle='#ffd85a';g.shadowColor='#ffcf38';g.shadowBlur=30;g.textAlign='center';g.font=`bold ${Math.max(24,Math.min(48,H/(d+1)*.16))}px sans-serif`;g.fillText('✦',x,y);g.font='bold 13px sans-serif';g.fillText('KEY',x,y+24);g.restore()}}
+ let d=Math.hypot(ghost.x-p.x,ghost.y-p.y),a=Math.atan2(ghost.y-p.y,ghost.x-p.x)-p.a;while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;
+ if(d<5&&Math.abs(a)<fov*.55&&!hidden){let x=W/2+a/fov*W,y=H*.53,s=Math.min(H*.4,H/(d+.3)*.55);g.save();g.globalAlpha=.7;g.fillStyle='#09080d';g.beginPath();g.ellipse(x,y,s*.22,s*.42,0,0,7);g.fill();g.fillStyle='#f4d7d1';g.shadowColor='#e33';g.shadowBlur=15;g.beginPath();g.arc(x-s*.07,y-s*.12,4,0,7);g.arc(x+s*.07,y-s*.12,4,0,7);g.fill();g.restore()}
+ g.strokeStyle='#ddd9d088';g.beginPath();g.moveTo(W/2-6,H/2);g.lineTo(W/2+6,H/2);g.moveTo(W/2,H/2-6);g.lineTo(W/2,H/2+6);g.stroke();drawMap();
 }
-function render(){
- const rays=Math.max(160,Math.floor(W/3)),fov=Math.PI/2.9;
- ctx.fillStyle='#10131b';ctx.fillRect(0,0,W,H/2);
- let grad=ctx.createLinearGradient(0,0,0,H/2);grad.addColorStop(0,'#07090e');grad.addColorStop(1,'#333039');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H/2);
- let floor=ctx.createLinearGradient(0,H/2,0,H);floor.addColorStop(0,'#302a2a');floor.addColorStop(1,'#09090d');ctx.fillStyle=floor;ctx.fillRect(0,H/2,W,H/2);
- for(let i=0;i<rays;i++){
-  let a=player.a-fov/2+(i/rays)*fov,d=cast(a),correct=d*Math.cos(a-player.a),height=Math.min(H*1.5,H/(correct+.08));
-  let shade=Math.max(10,105-correct*11);let side=Math.sin(a*17)>0?1:.78;
-  ctx.fillStyle=`rgb(${shade*side},${shade*.9*side},${shade*side})`;ctx.fillRect(i*W/rays,(H-height)/2,W/rays+1,height);
-  if(i%12===0){ctx.fillStyle='#090a0d33';ctx.fillRect(i*W/rays,(H-height)/2,W/rays,height)}
- }
- // flashlight vignette
- let v=ctx.createRadialGradient(W/2,H*.53,10,W/2,H*.53,H*.62);
- v.addColorStop(0,flash?'#ffffff00':'#00000099');v.addColorStop(.55,flash?'#00000022':'#000000cc');v.addColorStop(1,'#000000ee');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
- // ghost silhouette when near or during hunt
- let gd=Math.hypot(ghost.x-player.x,ghost.y-player.y);
- if(gd<5.8 && !hidden){
-  let rel=Math.atan2(ghost.y-player.y,ghost.x-player.x)-player.a;while(rel>Math.PI)rel-=2*Math.PI;while(rel<-Math.PI)rel+=2*Math.PI;
-  if(Math.abs(rel)<fov*.58){
-   let sx=W/2+(rel/fov)*W, sy=H*.52, size=Math.min(H*.55,H/(gd+.3)*.65);
-   ctx.save();ctx.globalAlpha=Math.min(.9,(6-gd)/4);ctx.fillStyle='#08070a';
-   ctx.beginPath();ctx.ellipse(sx,sy,size*.23,size*.43,0,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='#d9d0c2';ctx.shadowColor='#c51e32';ctx.shadowBlur=18;
-   ctx.beginPath();ctx.arc(sx-size*.09,sy-size*.12,size*.025,0,Math.PI*2);ctx.arc(sx+size*.09,sy-size*.12,size*.025,0,Math.PI*2);ctx.fill();ctx.restore();
-  }
- }
- // crosshair
- ctx.strokeStyle='#d9d0c277';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2-7,H/2);ctx.lineTo(W/2+7,H/2);ctx.moveTo(W/2,H/2-7);ctx.lineTo(W/2,H/2+7);ctx.stroke();
+function drawMap(){m.clearRect(0,0,112,112);let sz=9;for(let y=0;y<world.length;y++)for(let x=0;x<world[y].length;x++){m.fillStyle=world[y][x]==='1'?'#77717a':'#252630';m.fillRect(x*sz+2,y*sz+2,sz-1,sz-1)}m.fillStyle='#5de0a0';m.beginPath();m.arc(p.x*sz+2,p.y*sz+2,3,0,7);m.fill();if(!key.taken){m.fillStyle='#ffd34d';m.fillRect(key.x*sz,key.y*sz,5,5)}m.fillStyle='#ed5663';m.fillRect(1*sz,9*sz,5,5)}
+function move(dx,dy){if(!wall(p.x+dx,p.y))p.x+=dx;if(!wall(p.x,p.y+dy))p.y+=dy}
+function interact(){if(hidden){hidden=false;say('You step out of your hiding place.');return}if(!key.taken&&Math.hypot(key.x-p.x,key.y-p.y)<2.1){key.taken=true;hasKey=true;document.getElementById('objective').textContent='⭐ Great! Return to the green exit on your mini-map.';say('You got the key! 🎉 Now follow the mini-map to the exit.');return}if(Math.hypot(p.x-1.5,p.y-9.4)<1.6){if(hasKey){finish(true)}else say('The door needs a key. Follow the golden sparkle!');return}if(!battery.taken&&Math.hypot(p.x-battery.x,p.y-battery.y)<1.5){battery.taken=true;flash=true;say('Bonus battery collected! 🔦');return}say('Keep exploring — the glowing key is nearby!')}
+function finish(win){active=false;document.getElementById('end').style.display='flex';document.getElementById('endTitle').textContent=win?'YOU ESCAPED! 🎉':'OH NO!';document.getElementById('endText').textContent=win?'You solved the mystery and escaped the haunted house. You are a brave explorer!':'The ghost caught up this time. Try again — you can do it!'}
+function update(dt){elapsed+=dt;if(notice>0){notice-=dt;if(notice<=0)document.getElementById('message').style.display='none'}let turn=(keys.ArrowLeft||keys.a?-1:0)+(keys.ArrowRight||keys.d?1:0);p.a+=turn*dt*2.3;let f=(keys.ArrowUp||keys.w?1:0)-(keys.ArrowDown||keys.s?1:0);if(f&&!hidden)move(Math.cos(p.a)*f*p.speed*dt,Math.sin(p.a)*f*p.speed*dt);
+ ghost.timer+=dt;let dist=Math.hypot(p.x-ghost.x,p.y-ghost.y);if(ghost.timer>8){ghost.timer=0;ghost.mode=ghost.mode==='hunt'?'hide':'hunt';say(ghost.mode==='hunt'?'You hear footsteps... the ghost is coming!':'The ghost has disappeared for a moment.');}
+ if(ghost.mode==='hunt'&&!hidden){let a=Math.atan2(p.y-ghost.y,p.x-ghost.x),s=.43,nx=ghost.x+Math.cos(a)*s*dt,ny=ghost.y+Math.sin(a)*s*dt;if(!wall(nx,ghost.y))ghost.x=nx;if(!wall(ghost.x,ny))ghost.y=ny}
+ if(dist<.65&&!hidden){health--;ghost.x=9.5;ghost.y=8.5;ghost.mode='hide';ghost.timer=0;say('The ghost startled you! You have '+health+' chances left.');if(health<=0)finish(false)}
+ document.getElementById('status').innerHTML='❤️'.repeat(health)+'<br>🔦 '+(flash?'ON':'OFF')+(hidden?'<br>🙈 HIDING':'');
 }
-function move(dx,dy){let nx=player.x+dx,ny=player.y+dy;if(!wall(nx,player.y))player.x=nx;if(!wall(player.x,ny))player.y=ny}
-function interact(){
- if(hidden){hidden=false;say('You leave the hiding place. Stay quiet.');return}
- let near=objects.find(o=>!o.taken&&Math.hypot(o.x-player.x,o.y-player.y)<1.25);
- if(near){near.taken=true;if(near.type==='key'){keyFound=true;objective.textContent='OBJECTIVE: Use the brass key at the front door.';say('You found the brass key. The front door may finally open.')}
- else if(near.type==='battery'){flash=true;say('A battery! Your flashlight is recharged.')}
- else {say('A torn diary page: “It hides when the lights go out. It listens for footsteps...”');}return}
- if(Math.hypot(player.x-1.5,player.y-9.45)<1.5){if(keyFound){doorOpen=true;finish(true)}else say('The front door is locked. Find the brass key.');return}
- say('Nothing useful nearby. Look around carefully.');
-}
-function finish(win){playing=false;end.style.display='flex';document.getElementById('endTitle').textContent=win?'YOU ESCAPED':'CAUGHT IN THE DARK';document.getElementById('endText').textContent=win?'You unlocked the mansion and escaped into the cold night. But from an upstairs window, two pale eyes are still watching.':'The ghost found you in the darkness. The mansion has claimed another visitor.'}
-function update(dt){
- elapsed+=dt;if(msgTimer>0){msgTimer-=dt;if(msgTimer<=0)message.style.display='none'}
- if(hidden){ghost.timer+=dt;if(ghost.timer>4){hidden=false;ghost.timer=0;say('The ghost is getting closer. You cannot hide forever.')} }
- let turn=(keys.ArrowLeft||keys.a?-1:0)+(keys.ArrowRight||keys.d?1:0);player.a+=turn*dt*2.25;
- let forward=(keys.ArrowUp||keys.w?1:0)-(keys.ArrowDown||keys.s?1:0);
- if(forward&&!hidden)move(Math.cos(player.a)*forward*player.speed*dt,Math.sin(player.a)*forward*player.speed*dt);
- // ghost alternates between searching and stalking; it pauses to hide when player faces it
- let dist=Math.hypot(player.x-ghost.x,player.y-ghost.y);
- ghost.timer+=dt;
- if(ghost.mode==='hide'&&ghost.timer>2.2){ghost.mode='hunt';ghost.timer=0}
- else if(ghost.mode==='hunt'&&ghost.timer>7){ghost.mode='hide';ghost.timer=0}
- if(ghost.mode==='hunt'&&!hidden){
-  let ang=Math.atan2(player.y-ghost.y,player.x-ghost.x),speed=.72;
-  let nx=ghost.x+Math.cos(ang)*speed*dt,ny=ghost.y+Math.sin(ang)*speed*dt;
-  if(!wall(nx,ghost.y))ghost.x=nx;if(!wall(ghost.x,ny))ghost.y=ny;
- }
- if(dist<.62&&!hidden){health--;ghost.x=9.5;ghost.y=8.5;ghost.mode='hide';ghost.timer=0;say('The ghost touched you! It vanished... for now.');if(health<=0)finish(false)}
- status.innerHTML='HEALTH '+('▰'.repeat(health))+('▱'.repeat(3-health))+'<br>FLASHLIGHT '+(flash?'▰▰▰':'▱▱▱')+'<br>GHOST: '+(ghost.mode==='hunt'?'HUNTING':'HIDING');
- if(elapsed>10&&objective.textContent.includes('Find the brass'))objective.textContent='OBJECTIVE: Search the house for the brass key.';
-}
-function loop(t){if(!playing)return;let dt=Math.min(.05,(t-last)/1000||0);last=t;update(dt);render();requestAnimationFrame(loop)}
-document.getElementById('begin').onclick=()=>{start.style.display='none';playing=true;last=performance.now();say('The door slams shut behind you. Find the brass key.');requestAnimationFrame(loop)};
-addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.toLowerCase()==='e')interact();if(e.key.toLowerCase()==='f'){flash=!flash;say(flash?'Flashlight on.':'Flashlight off.')}if(e.key.toLowerCase()==='h'){hidden=!hidden;ghost.timer=0;say(hidden?'You hide. Hold still.':'You leave your hiding place.')}});
-addEventListener('keyup',e=>keys[e.key]=false);
-document.querySelectorAll('[data-key]').forEach(b=>{
- const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false));
-});
-document.querySelector('[data-action="interact"]').onclick=interact;
-document.querySelector('[data-action="light"]').onclick=()=>{flash=!flash;say(flash?'Flashlight on.':'Flashlight off.')};
-document.querySelector('[data-action="hide"]').onclick=()=>{hidden=!hidden;ghost.timer=0;say(hidden?'You hide. Hold still.':'You leave your hiding place.')};
+function loop(t){if(!active)return;let dt=Math.min(.05,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
+document.getElementById('play').onclick=()=>{document.getElementById('start').style.display='none';active=true;last=performance.now();say('The key is just ahead. Follow the golden sparkle!');requestAnimationFrame(loop)};
+addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.toLowerCase()==='e')interact();if(e.key.toLowerCase()==='f'){flash=!flash;say(flash?'Flashlight on':'Flashlight off')}if(e.key.toLowerCase()==='h'){hidden=!hidden;ghost.timer=0;say(hidden?'You are hiding.':'You are out of hiding.')}});addEventListener('keyup',e=>keys[e.key]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.onpointerdown=e=>{e.preventDefault();keys[k]=true};['pointerup','pointerleave','pointercancel'].forEach(v=>b.addEventListener(v,()=>keys[k]=false))});
+document.querySelector('[data-act="interact"]').onclick=interact;document.querySelector('[data-act="light"]').onclick=()=>flash=!flash;document.querySelector('[data-act="hide"]').onclick=()=>{hidden=!hidden;ghost.timer=0;say(hidden?'You are hiding.':'You are out of hiding.')};
 })();
-</script>
-</body></html>
+</script></body></html>
